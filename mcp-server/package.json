@@ -1,0 +1,51 @@
+{
+  "name": "@mfkvault/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for MFKVault — browse, buy, sell, and register AI agent skills directly from Claude Desktop, Cursor, Windsurf and any MCP-compatible client.",
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "claude",
+    "cursor",
+    "windsurf",
+    "mfkvault",
+    "ai-agent",
+    "skills",
+    "marketplace",
+    "anthropic"
+  ],
+  "homepage": "https://mfkvault.com",
+  "bugs": {
+    "url": "https://github.com/mfkvault/mfkvault-skills/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfkvault/mcp-server.git"
+  },
+  "license": "MIT",
+  "author": "MFKVault <hello@mfkvault.com>",
+  "type": "module",
+  "bin": {
+    "mfkvault-mcp": "./src/index.js",
+    "mfkvault-mcp-server": "./src/index.js"
+  },
+  "main": "./src/index.js",
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node src/index.js --selftest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
