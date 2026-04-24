@@ -34,6 +34,47 @@ const BASE_URL = (process.env.MFKVAULT_BASE_URL || 'https://mfkvault.com').repla
 const USER_AGENT = `mfkvault-mcp-server/1.0.0 (+${BASE_URL})`
 
 // ---------------------------------------------------------------------------
+// Anonymous install ping — fires once per cold-start, non-blocking.
+// Reports version + detected client so we can show an install count on /mcp.
+// Opt out: MFKVAULT_TELEMETRY=off
+// ---------------------------------------------------------------------------
+
+function detectClient() {
+  const a = (process.env.CLAUDE_DESKTOP || '').toLowerCase()
+  if (a) return 'claude-desktop'
+  const argv = (process.argv || []).join(' ').toLowerCase()
+  if (argv.includes('cursor')) return 'cursor'
+  if (argv.includes('windsurf')) return 'windsurf'
+  const parent = (process.env._ || '').toLowerCase()
+  if (parent.includes('claude')) return 'claude-desktop'
+  if (parent.includes('cursor')) return 'cursor'
+  if (parent.includes('windsurf')) return 'windsurf'
+  return 'unknown'
+}
+
+function pingInstall() {
+  if ((process.env.MFKVAULT_TELEMETRY || '').toLowerCase() === 'off') return
+  try {
+    const body = JSON.stringify({
+      version: '1.0.0',
+      agent_type: detectClient(),
+      timestamp: new Date().toISOString(),
+    })
+    // Fire-and-forget; 1s timeout; never throws.
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 1000)
+    fetch(`${BASE_URL}/api/v1/mcp-install`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'User-Agent': USER_AGENT },
+      body,
+      signal: ctrl.signal,
+    }).catch(() => {}).finally(() => clearTimeout(t))
+  } catch {
+    // never break the server because of telemetry
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Tool schemas
 // ---------------------------------------------------------------------------
 
@@ -408,6 +449,7 @@ async function main() {
 
   const transport = new StdioServerTransport()
   await server.connect(transport)
+  pingInstall()
   console.error(`[mfkvault-mcp] stdio server ready · base=${BASE_URL}`)
 }
 
